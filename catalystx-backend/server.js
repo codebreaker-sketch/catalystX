@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key_change_in_production';
 const MONGODB_URI = process.env.MONGODB_URI;
-const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000')
+const allowedOrigins = (process.env.CORS_ORIGINS || 'https://catalystx-backend.onrender.com')
   .split(',')
   .map(origin => origin.trim())
   .filter(Boolean);
