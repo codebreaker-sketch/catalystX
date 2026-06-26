@@ -11,7 +11,9 @@ const GLOBAL_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap');
   *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
   html { scroll-behavior: smooth; }
-  body { background:#000; color:#fff; font-family:'Space Grotesk',sans-serif; overflow-x:hidden; cursor:none; }
+  body { background:#000; color:#fff; font-family:'Space Grotesk',sans-serif; margin:0; overflow-x:hidden; width:100%; min-height:100%; cursor:none; }
+  #root { min-height:100vh; overflow-x:hidden; width:100%; }
+  img { display:block; max-width:100%; }
   a, button, input, [data-cursor] { cursor:none; }
   ::-webkit-scrollbar { width:4px; }
   ::-webkit-scrollbar-track { background:#000; }
@@ -25,7 +27,8 @@ const GLOBAL_CSS = `
 const G = "#22c55e";
 const GLOW = "rgba(34,197,94,0.4)";
 const BORDER = "rgba(34,197,94,0.18)";
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+const buildApiUrl = (path) => `${API_BASE || (import.meta.env.DEV ? "http://localhost:4000" : "")}${path}`;
 const AUTH_TOKEN_KEY = "catalystx_token";
 
 const TEAM = [
@@ -112,6 +115,7 @@ function AuthPage({ onSuccess, onCancel }) {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
+  const isMobile = useIsMobile(760);
 
   const handleChange = (event) => {
     setForm({ ...form, [event.target.name]: event.target.value });
@@ -127,7 +131,7 @@ function AuthPage({ onSuccess, onCancel }) {
     if (mode === "register") payload.name = form.name.trim();
 
     try {
-      const response = await fetch(`${API_BASE}${endpoint}`, {
+      const response = await fetch(buildApiUrl(endpoint), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -148,9 +152,9 @@ function AuthPage({ onSuccess, onCancel }) {
   };
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem", background: "radial-gradient(circle at top, rgba(34,197,94,0.12), transparent 28%), #000" }}>
-      <div style={{ width: "100%", maxWidth: 980, display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: "2rem", background: "rgba(255,255,255,0.03)", border: `1px solid ${BORDER}`, borderRadius: 28, overflow: "hidden", boxShadow: `0 30px 80px rgba(0,0,0,0.3)` }}>
-        <div style={{ padding: "2.5rem 2rem", display: "flex", flexDirection: "column", justifyContent: "center", gap: "1.2rem" }}>
+    <div style={{ minHeight: isMobile ? "auto" : "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: isMobile ? "1rem" : "2rem", background: "radial-gradient(circle at top, rgba(34,197,94,0.12), transparent 28%), #000" }}>
+      <div style={{ width: "100%", maxWidth: 980, display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1.1fr 0.9fr", gap: isMobile ? "1rem" : "2rem", background: "rgba(255,255,255,0.03)", border: `1px solid ${BORDER}`, borderRadius: 28, overflow: "hidden", boxShadow: `0 30px 80px rgba(0,0,0,0.3)` }}>
+        <div style={{ padding: isMobile ? "1.3rem 1rem 0.75rem" : "2.5rem 2rem", display: "flex", flexDirection: "column", justifyContent: "center", gap: "1.2rem" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: "0.85rem", marginBottom: "1rem" }}>
             <div style={{ width: 12, height: 12, borderRadius: 999, background: G }} />
             <span style={{ color: G, textTransform: "uppercase", letterSpacing: "0.16em", fontSize: "0.75rem", fontWeight: 700 }}>CatalystX Community</span>
@@ -159,29 +163,29 @@ function AuthPage({ onSuccess, onCancel }) {
           <p style={{ color: "rgba(255,255,255,0.7)", lineHeight: 1.8, maxWidth: 540 }}>
             Sign in to connect with the community, access events, and secure your membership. New here? Register and set up your credentials with Mongo Atlas-backed auth.
           </p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "0.8rem" }}>
-            <button type="button" onClick={() => setMode("login")} style={{ padding: "0.95rem 1.1rem", borderRadius: 999, border: mode === "login" ? `1px solid ${G}` : `1px solid rgba(255,255,255,0.12)`, background: mode === "login" ? "rgba(34,197,94,0.12)" : "transparent", color: "#fff", fontWeight: 700 }}>Sign In</button>
-            <button type="button" onClick={() => setMode("register")} style={{ padding: "0.95rem 1.1rem", borderRadius: 999, border: mode === "register" ? `1px solid ${G}` : `1px solid rgba(255,255,255,0.12)`, background: mode === "register" ? "rgba(34,197,94,0.12)" : "transparent", color: "#fff", fontWeight: 700 }}>Register</button>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(2, minmax(0, 1fr))", gap: "0.8rem" }}>
+            <button type="button" onClick={() => setMode("login")} style={{ padding: "0.95rem 1.1rem", borderRadius: 999, border: mode === "login" ? `1px solid ${G}` : `1px solid rgba(255,255,255,0.12)`, background: mode === "login" ? "rgba(34,197,94,0.12)" : "transparent", color: "#fff", fontWeight: 700, minHeight: 44, touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}>Sign In</button>
+            <button type="button" onClick={() => setMode("register")} style={{ padding: "0.95rem 1.1rem", borderRadius: 999, border: mode === "register" ? `1px solid ${G}` : `1px solid rgba(255,255,255,0.12)`, background: mode === "register" ? "rgba(34,197,94,0.12)" : "transparent", color: "#fff", fontWeight: 700, minHeight: 44, touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}>Register</button>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ padding: "2.5rem 2rem", display: "flex", flexDirection: "column", gap: "1rem", background: "rgba(0,0,0,0.45)" }}>
+        <form onSubmit={handleSubmit} style={{ padding: isMobile ? "0.75rem 1rem 1.25rem" : "2.5rem 2rem", display: "flex", flexDirection: "column", gap: "1rem", background: "rgba(0,0,0,0.45)" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
             <label style={{ color: "rgba(255,255,255,0.75)", fontSize: "0.85rem", fontWeight: 600 }}>Email address</label>
-            <input name="email" type="email" value={form.email} onChange={handleChange} required style={{ width: "100%", borderRadius: 16, border: `1px solid rgba(255,255,255,0.14)`, padding: "1rem 1rem", background: "rgba(255,255,255,0.03)", color: "#fff" }} />
+            <input name="email" type="email" value={form.email} onChange={handleChange} required style={{ width: "100%", borderRadius: 16, border: `1px solid rgba(255,255,255,0.14)`, padding: "1rem 1rem", background: "rgba(255,255,255,0.03)", color: "#fff", fontSize: "1rem", minHeight: 44 }} />
           </div>
           {mode === "register" ? (
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               <label style={{ color: "rgba(255,255,255,0.75)", fontSize: "0.85rem", fontWeight: 600 }}>Full name</label>
-              <input name="name" type="text" value={form.name} onChange={handleChange} required style={{ width: "100%", borderRadius: 16, border: `1px solid rgba(255,255,255,0.14)`, padding: "1rem 1rem", background: "rgba(255,255,255,0.03)", color: "#fff" }} />
+              <input name="name" type="text" value={form.name} onChange={handleChange} required style={{ width: "100%", borderRadius: 16, border: `1px solid rgba(255,255,255,0.14)`, padding: "1rem 1rem", background: "rgba(255,255,255,0.03)", color: "#fff", fontSize: "1rem", minHeight: 44 }} />
             </div>
           ) : null}
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
             <label style={{ color: "rgba(255,255,255,0.75)", fontSize: "0.85rem", fontWeight: 600 }}>Password</label>
-            <input name="password" type="password" value={form.password} onChange={handleChange} required style={{ width: "100%", borderRadius: 16, border: `1px solid rgba(255,255,255,0.14)`, padding: "1rem 1rem", background: "rgba(255,255,255,0.03)", color: "#fff" }} />
+            <input name="password" type="password" value={form.password} onChange={handleChange} required style={{ width: "100%", borderRadius: 16, border: `1px solid rgba(255,255,255,0.14)`, padding: "1rem 1rem", background: "rgba(255,255,255,0.03)", color: "#fff", fontSize: "1rem", minHeight: 44 }} />
           </div>
           {error ? <div style={{ color: "#f87171", fontSize: "0.9rem", minHeight: 24 }}>{error}</div> : <div style={{ minHeight: 24 }} />}
-          <button type="submit" style={{ marginTop: "0.5rem", padding: "1rem 1.25rem", borderRadius: 16, border: "none", background: G, color: "#000", fontWeight: 700, fontSize: "1rem" }}>
+          <button type="submit" style={{ marginTop: "0.5rem", padding: "1rem 1.25rem", borderRadius: 16, border: "none", background: G, color: "#000", fontWeight: 700, fontSize: "1rem", minHeight: 48, touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}>
             {status === "loading" ? "Working..." : mode === "login" ? "Sign In" : "Create Account"}
           </button>
           <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.9rem", lineHeight: 1.6, marginTop: "0.5rem" }}>
@@ -446,6 +450,7 @@ function LogoSphere({ size = 160, glow = true }) {
 function Nav({ user, onSignOut, onJoinClick }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const isMobile = useIsMobile(760);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", onScroll);
@@ -455,7 +460,8 @@ function Nav({ user, onSignOut, onJoinClick }) {
   const navStyle = {
     position:"fixed", top:0, left:0, right:0, zIndex:1000,
     display:"flex", alignItems:"center", justifyContent:"space-between",
-    padding:"1rem 2.5rem",
+    flexWrap:"wrap", gap:"0.7rem",
+    padding: isMobile ? "0.8rem 1rem" : "1rem 2.5rem",
     background: scrolled ? "rgba(0,0,0,0.92)" : "rgba(0,0,0,0.4)",
     backdropFilter:"blur(20px)",
     borderBottom:`1px solid ${scrolled ? BORDER : "transparent"}`,
@@ -464,7 +470,7 @@ function Nav({ user, onSignOut, onJoinClick }) {
 
   return (
     <nav style={navStyle}>
-      <a href="#hero" style={{ display:"flex", alignItems:"center", gap:"0.7rem", textDecoration:"none" }}>
+      <a href="#hero" style={{ display:"flex", alignItems:"center", gap:"0.7rem", textDecoration:"none", flexShrink:0 }}>
         <div style={{ width:40, height:40, borderRadius:"50%", border:`1.5px solid ${G}`, overflow:"hidden", boxShadow:`0 0 14px ${GLOW}` }}>
           <div style={{ width:"100%", height:"100%", backgroundImage:"url(/SAVE_20260625_193602.jpg)", backgroundSize:"cover" }} />
         </div>
@@ -472,8 +478,8 @@ function Nav({ user, onSignOut, onJoinClick }) {
           Catalyst<span style={{ color:G }}>X</span>
         </span>
       </a>
-      <div style={{ display:"flex", gap:"2rem", alignItems:"center" }}>
-        {["About","What We Do","Team"].map(l => (
+      <div style={{ display:"flex", gap: isMobile ? "0.6rem" : "1.2rem", alignItems:"center", flexWrap:"wrap", justifyContent:"flex-end", marginLeft:"auto", minWidth:0 }}>
+        {!isMobile && ["About","What We Do","Team"].map(l => (
           <a key={l} href={`#${l.toLowerCase().replace(/ /g,"-")}`}
             style={{ color:"rgba(255,255,255,0.6)", textDecoration:"none", fontSize:"0.86rem", fontWeight:500, letterSpacing:"0.04em", transition:"color 0.2s" }}
             onMouseEnter={e => e.target.style.color = G}
@@ -481,7 +487,7 @@ function Nav({ user, onSignOut, onJoinClick }) {
           >{l}</a>
         ))}
         <button onClick={onJoinClick} style={{
-          padding:"0.55rem 1.4rem",
+          padding: isMobile ? "0.55rem 1rem" : "0.55rem 1.4rem",
           background:G, color:"#000", borderRadius:8,
           fontWeight:700, fontSize:"0.84rem", border:"none", letterSpacing:"0.04em",
           boxShadow:`0 0 18px rgba(34,197,94,0.25)`,
@@ -492,9 +498,9 @@ function Nav({ user, onSignOut, onJoinClick }) {
           onMouseLeave={e => { e.target.style.boxShadow = `0 0 18px rgba(34,197,94,0.25)`; e.target.style.transform = ""; }}
         >{user ? "Dashboard →" : "Join Us →"}</button>
         {user ? (
-          <div style={{ display:"flex", alignItems:"center", gap:"0.8rem" }}>
-            <span style={{ color:"rgba(255,255,255,0.8)", fontSize:"0.88rem", fontWeight:700 }}>{user.name.split(" ")[0]}</span>
-            <button onClick={onSignOut} style={{ whiteSpace:"nowrap", padding:"0.55rem 1rem", borderRadius:999, border:`1px solid ${G}`, background:"rgba(34,197,94,0.08)", color:G, fontWeight:700, cursor:"pointer" }}>Sign Out</button>
+          <div style={{ display:"flex", alignItems:"center", gap:"0.6rem", flexWrap:"wrap" }}>
+            <span style={{ color:"rgba(255,255,255,0.8)", fontSize:"0.84rem", fontWeight:700 }}>{user.name.split(" ")[0]}</span>
+            <button onClick={onSignOut} style={{ whiteSpace:"nowrap", padding:"0.5rem 0.9rem", borderRadius:999, border:`1px solid ${G}`, background:"rgba(34,197,94,0.08)", color:G, fontWeight:700, cursor:"pointer" }}>Sign Out</button>
           </div>
         ) : null}
       </div>
@@ -507,6 +513,7 @@ function Nav({ user, onSignOut, onJoinClick }) {
 ══════════════════════════════════════════════════════ */
 function Hero() {
   const [loaded, setLoaded] = useState(false);
+  const isMobile = useIsMobile(720);
   useEffect(() => { setTimeout(() => setLoaded(true), 100); }, []);
 
   const fade = (delay) => ({
@@ -516,7 +523,7 @@ function Hero() {
   });
 
   return (
-    <section id="hero" style={{ position:"relative", zIndex:1, minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", textAlign:"center", padding:"2rem 2rem 1.5rem" }}>
+    <section id="hero" style={{ position:"relative", zIndex:1, minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", textAlign:"center", padding: isMobile ? "1.2rem 1rem 1rem" : "2rem 2rem 1.5rem" }}>
 
       {/* Ambient glow blob */}
       <div style={{ position:"absolute", top:"30%", left:"50%", transform:"translate(-50%,-50%)", width:600, height:600, background:"radial-gradient(ellipse, rgba(34,197,94,0.1) 0%, transparent 65%)", pointerEvents:"none", zIndex:0 }} />
@@ -562,9 +569,9 @@ function Hero() {
         <strong style={{ color:"#fff", fontWeight:600 }}>opportunities</strong> for young people — tech and non-tech alike.
       </p>
 
-      <div style={{ ...fade(0.55), position:"relative", zIndex:1, display:"flex", gap:"1rem", flexWrap:"wrap", justifyContent:"center" }}>
-        <GlowBtn href="#join" primary>Join the Community</GlowBtn>
-        <GlowBtn href="#about">Discover More ↓</GlowBtn>
+      <div style={{ ...fade(0.55), position:"relative", zIndex:1, display:"flex", gap: isMobile ? "0.75rem" : "1rem", flexWrap:"wrap", justifyContent:"center", width:"100%" }}>
+        <GlowBtn href="#join" primary fullWidth={isMobile}>Join the Community</GlowBtn>
+        <GlowBtn href="#about" fullWidth={isMobile}>Discover More ↓</GlowBtn>
       </div>
 
       {/* Scroll indicator */}
@@ -576,12 +583,14 @@ function Hero() {
   );
 }
 
-function GlowBtn({ href, children, primary }) {
+function GlowBtn({ href, children, primary, fullWidth }) {
   const base = {
-    display:"inline-block", padding:"0.88rem 2.2rem",
+    display:"inline-flex", justifyContent:"center", alignItems:"center", padding:"0.88rem 2.2rem",
     borderRadius:10, fontWeight:700, fontSize:"0.92rem",
     textDecoration:"none", letterSpacing:"0.04em",
     transition:"all 0.25s ease", position:"relative", overflow:"hidden",
+    width: fullWidth ? "100%" : "auto",
+    maxWidth: fullWidth ? "320px" : "none",
   };
   const styles = primary
     ? { ...base, background:G, color:"#000", boxShadow:`0 0 22px rgba(34,197,94,0.3)` }
@@ -607,6 +616,7 @@ function GlowBtn({ href, children, primary }) {
 ══════════════════════════════════════════════════════ */
 function Stats() {
   const [ref, visible] = useInView();
+  const isMobile = useIsMobile(640);
   const stats = [
     { target:4,    suffix:"",  label:"Co-Founders" },
     { target:100,  suffix:"+", label:"Target Members" },
@@ -618,9 +628,9 @@ function Stats() {
       position:"relative", zIndex:1,
       background:"linear-gradient(90deg,rgba(34,197,94,0.06),rgba(34,197,94,0.02))",
       borderTop:`1px solid ${BORDER}`, borderBottom:`1px solid ${BORDER}`,
-      padding:"1.2rem 2rem",
+      padding: isMobile ? "1rem 1rem" : "1.2rem 2rem",
     }}>
-      <div style={{ maxWidth:1000, margin:"0 auto", display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"1rem", textAlign:"center" }}>
+      <div style={{ maxWidth:1000, margin:"0 auto", display:"grid", gridTemplateColumns: isMobile ? "repeat(2, minmax(0, 1fr))" : "repeat(4,1fr)", gap:"1rem", textAlign:"center" }}>
         {stats.map((s, i) => <StatItem key={i} {...s} active={visible} delay={i * 0.08} />)}
       </div>
     </div>
@@ -642,10 +652,10 @@ function StatItem({ target, suffix, label, active, delay }) {
 ══════════════════════════════════════════════════════ */
 function About() {
   const [ref, visible] = useInView();
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile(760);
   return (
-    <section id="about" ref={ref} style={{ position:"relative", zIndex:1, padding:"2.5rem 2rem", maxWidth:1100, margin:"0 auto" }}>
-      <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "1.2fr 0.9fr", gap:"1rem", alignItems:"center" }}>
+    <section id="about" ref={ref} style={{ position:"relative", zIndex:1, padding: isMobile ? "1.5rem 1rem" : "2.5rem 2rem", maxWidth:1100, margin:"0 auto" }}>
+      <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "1.2fr 0.9fr", gap: isMobile ? "1.25rem" : "1rem", alignItems:"center" }}>
 
         {/* Content side */}
         <div style={{ opacity:visible?1:0, transform:visible?"translateX(0)":"translateX(-40px)", transition:"all 0.9s ease", maxWidth:540 }}>
@@ -663,9 +673,9 @@ function About() {
         </div>
 
         {/* Visual side */}
-        <div style={{ display:"flex", justifyContent:"flex-end", opacity:visible?1:0, transform:visible?"translateX(0)":"translateX(40px)", transition:"all 0.9s 0.15s ease" }}>
+        <div style={{ display:"flex", justifyContent: isMobile ? "center" : "flex-end", opacity:visible?1:0, transform:visible?"translateX(0)":"translateX(40px)", transition:"all 0.9s 0.15s ease" }}>
           <div style={{ position:"relative", display:"flex", alignItems:"center", justifyContent:"center" }}>
-            <LogoSphere size={240} />
+            <LogoSphere size={isMobile ? 180 : 240} />
           </div>
         </div>
       </div>
@@ -704,9 +714,9 @@ function PillarRow({ icon, title, body, visible, delay }) {
 ══════════════════════════════════════════════════════ */
 function WhatWeDo() {
   const [ref, visible] = useInView();
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile(760);
   return (
-    <section id="what-we-do" ref={ref} style={{ position:"relative", zIndex:1, padding:"2.5rem 2rem", background:"#080808", borderTop:`1px solid ${BORDER}`, borderBottom:`1px solid ${BORDER}` }}>
+    <section id="what-we-do" ref={ref} style={{ position:"relative", zIndex:1, padding: isMobile ? "1.5rem 1rem" : "2.5rem 2rem", background:"#080808", borderTop:`1px solid ${BORDER}`, borderBottom:`1px solid ${BORDER}` }}>
       <div style={{ maxWidth:1100, margin:"0 auto" }}>
         <div style={{ textAlign:"center", marginBottom:"1rem", opacity:visible?1:0, transform:visible?"translateY(0)":"translateY(24px)", transition:"all 0.7s ease" }}>
           <span style={{ fontSize:"0.7rem", fontWeight:700, letterSpacing:"0.2em", textTransform:"uppercase", color:G }}>What We Do</span>
@@ -762,9 +772,9 @@ function ServiceCard({ icon, title, body, visible, delay }) {
 ══════════════════════════════════════════════════════ */
 function Team() {
   const [ref, visible] = useInView();
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile(760);
   return (
-    <section id="team" ref={ref} style={{ position:"relative", zIndex:1, padding:"2.5rem 2rem", maxWidth:1100, margin:"0 auto" }}>
+    <section id="team" ref={ref} style={{ position:"relative", zIndex:1, padding: isMobile ? "1.5rem 1rem" : "2.5rem 2rem", maxWidth:1100, margin:"0 auto" }}>
       <div style={{ textAlign:"center", marginBottom:"1rem", opacity:visible?1:0, transform:visible?"translateY(0)":"translateY(24px)", transition:"all 0.7s ease" }}>
         <span style={{ fontSize:"0.7rem", fontWeight:700, letterSpacing:"0.2em", textTransform:"uppercase", color:G }}>The Founders</span>
         <h2 style={{ fontFamily:"Orbitron,sans-serif", fontSize:"clamp(1.8rem,4vw,3rem)", fontWeight:700, margin:"0.6rem 0 0.8rem" }}>Four Minds.<br />One Mission.</h2>
@@ -848,11 +858,12 @@ function MemberCard({ initials, name, role, sub, li, color, photo, visible, dela
 ══════════════════════════════════════════════════════ */
 function Join({ onJoinClick, isLoggedIn }) {
   const [ref, visible] = useInView();
+  const isMobile = useIsMobile(760);
 
   return (
     <section id="join" ref={ref} style={{
       position:"relative", zIndex:1,
-      padding:"2.5rem 2rem",
+      padding: isMobile ? "1.5rem 1rem" : "2.5rem 2rem",
       background:"#080808",
       borderTop:`1px solid ${BORDER}`,
       textAlign:"center", overflow:"hidden",
@@ -894,9 +905,10 @@ function Join({ onJoinClick, isLoggedIn }) {
    FOOTER
 ══════════════════════════════════════════════════════ */
 function Footer() {
+  const isMobile = useIsMobile(760);
   return (
-    <footer style={{ position:"relative", zIndex:1, background:"#000", borderTop:`1px solid ${BORDER}`, padding:"1.5rem 1.8rem 1rem" }}>
-      <div style={{ maxWidth:1100, margin:"0 auto", display:"grid", gridTemplateColumns:"2fr 1fr 1fr", gap:"1rem", marginBottom:"1rem" }}>
+    <footer style={{ position:"relative", zIndex:1, background:"#000", borderTop:`1px solid ${BORDER}`, padding:isMobile ? "1.2rem 1rem 1rem" : "1.5rem 1.8rem 1rem" }}>
+      <div style={{ maxWidth:1100, margin:"0 auto", display:"grid", gridTemplateColumns: isMobile ? "1fr" : "2fr 1fr 1fr", gap:"1rem", marginBottom:"1rem" }}>
         <div>
           <div style={{ display:"flex", alignItems:"center", gap:"0.75rem", marginBottom:"1rem" }}>
             <div style={{ width:36, height:36, borderRadius:"50%", border:`1.5px solid ${G}`, overflow:"hidden", boxShadow:`0 0 10px ${GLOW}` }}>
@@ -925,9 +937,9 @@ function Footer() {
           </div>
         ))}
       </div>
-      <div style={{ maxWidth:1100, margin:"0 auto", paddingTop:"1.5rem", borderTop:`1px solid ${BORDER}`, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+      <div style={{ maxWidth:1100, margin:"0 auto", paddingTop:"1.5rem", borderTop:`1px solid ${BORDER}`, display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:"0.75rem" }}>
         <span style={{ fontSize:"0.76rem", color:"rgba(255,255,255,0.3)" }}>© 2026 CatalystX. Built with purpose.</span>
-        <div style={{ display:"flex", gap:"0.5rem" }}>
+        <div style={{ display:"flex", gap:"0.5rem", flexWrap:"wrap" }}>
           {["LEARN","BUILD","LEAD"].map(p => (
             <span key={p} style={{ padding:"0.22rem 0.75rem", background:"rgba(34,197,94,0.08)", border:`1px solid ${BORDER}`, borderRadius:999, fontSize:"0.68rem", fontWeight:700, color:G, letterSpacing:"0.08em" }}>{p}</span>
           ))}
@@ -1126,6 +1138,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
       display: "flex", alignItems: "center", justifyContent: "center",
       zIndex: 10000,
       padding: "1rem",
+      overflowY: "auto",
       backdropFilter: "blur(4px)",
     }}>
       <div style={{ position: "relative", width: "100%", maxWidth: 980 }}>
@@ -1169,7 +1182,7 @@ export default function App() {
     }
 
     setLoadingAuth(true);
-    fetch(`${API_BASE}/api/auth/me`, {
+    fetch(buildApiUrl("/api/auth/me"), {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(async (res) => {

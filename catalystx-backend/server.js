@@ -14,9 +14,15 @@ require('dotenv').config();
 // CONFIGURATION
 // ─────────────────────────────────────────────────────────────
 const app = express();
-const PORT = process.env.PORT || 4000;
+// const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key_change_in_production';
 const MONGODB_URI = process.env.MONGODB_URI;
+const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
 
 if (!MONGODB_URI) {
   console.error('❌ MONGODB_URI not defined in .env file');
@@ -27,9 +33,13 @@ if (!MONGODB_URI) {
 // MIDDLEWARE
 // ─────────────────────────────────────────────────────────────
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? 'https://yourdomain.com' 
-    : ['http://localhost:5173', 'http://localhost:3000'],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(null, false);
+  },
   credentials: true,
 }));
 app.use(express.json());
