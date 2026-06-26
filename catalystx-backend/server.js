@@ -14,9 +14,7 @@ require('dotenv').config();
 // CONFIGURATION
 // ─────────────────────────────────────────────────────────────
 const app = express();
-// const PORT = process.env.PORT || 4000;
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key_change_in_production';
 const MONGODB_URI = process.env.MONGODB_URI;
 const allowedOrigins = (process.env.CORS_ORIGINS || 'https://catalystx-backend.onrender.com')
@@ -463,12 +461,12 @@ app.use((err, req, res, next) => {
 // ─────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log('\n' + '═'.repeat(60));
-  console.log('🚀 CatalystX Backend Server');
+  console.log('🚀 CatalystX Backend Server Running');
   console.log('═'.repeat(60));
-  console.log(`📍 Server: http://localhost:${PORT}`);
+  console.log(`📍 Port: ${PORT}`);
   console.log(`🔒 JWT Secret: ${JWT_SECRET === 'your_secret_key_change_in_production' ? '⚠️  DEFAULT (change in .env)' : '✅ Custom'}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`📊 Database: ${mongoose.connection.name || 'connecting...'}`);
+  console.log(`📊 Database Status: ${mongoose.connection.readyState === 1 ? 'Connected' : 'Connecting...'}`);
   console.log('═'.repeat(60));
   console.log('\n📚 Available Routes:');
   console.log('   POST   /api/auth/register         - Register new user');
@@ -478,10 +476,7 @@ app.listen(PORT, () => {
   console.log('   POST   /api/auth/change-password  - Change password (protected)');
   console.log('   GET    /health                    - Health check');
   console.log('   GET    /api/users                 - List all users (dev only)');
-  console.log('\n💡 Remember:');
-  console.log('   - CORS enabled for frontend (http://localhost:5173)');
-  console.log('   - MongoDB Atlas connected');
-  console.log('   - Remove /api/users route before production\n');
+  console.log('═'.repeat(60) + '\n');
 });
 
 // Handle graceful shutdown
